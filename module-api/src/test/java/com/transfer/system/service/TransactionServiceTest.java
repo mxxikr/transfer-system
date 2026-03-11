@@ -405,22 +405,6 @@ class TransactionServiceTest {
         }
 
         /**
-         * 거래 내역 조회 시 null 계좌번호
-         */
-        @Test
-        void getTransactionHistory_nullAccountNumber() {
-            expectHistoryException(null, 0, 10, ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
-        /**
-         * 거래 내역 조회 시 빈 계좌번호
-         */
-        @Test
-        void getTransactionHistory_emptyAccountNumber() {
-            expectHistoryException("", 0, 10, ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
-        /**
          * 거래 내역 조회 시 계좌가 존재하지 않는 경우
          */
         @Test

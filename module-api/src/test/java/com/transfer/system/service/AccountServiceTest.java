@@ -162,15 +162,6 @@ class AccountServiceTest {
         }
 
         /**
-         * 계좌 생성 실패 - 요청이 null인 경우
-         */
-        @Test
-        void createAccount_fail_whenRequestIsNull() {
-            expectCreateAccountException(null, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-        }
-
-        /**
          * 계좌 생성 실패 - 중복된 계좌 번호
          */
         @Test
@@ -179,51 +170,6 @@ class AccountServiceTest {
             when(accountRepository.existsByAccountNumber(testAccountNumber)).thenReturn(true);
 
             expectCreateAccountException(accountCreateRequestDTO, ErrorCode.DUPLICATE_ACCOUNT_NUMBER);
-            verify(accountRepository, never()).save(any());
-        }
-
-        /**
-         * 계좌 생성 실패 - 계좌명 누락
-         */
-        @Test
-        void createAccount_fail_whenAccountNameIsNull() {
-            AccountCreateRequestDTO invalidDto = AccountCreateRequestDTO.builder()
-                .accountName(null)
-                .accountType(AccountType.PERSONAL)
-                .currencyType(CurrencyType.KRW)
-                .build();
-
-            expectCreateAccountException(invalidDto, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-        }
-
-        /**
-         * 계좌 생성 실패 - 계좌 유형 누락
-         */
-        @Test
-        void createAccount_fail_whenAccountTypeIsNull() {
-            AccountCreateRequestDTO invalidDto = AccountCreateRequestDTO.builder()
-                .accountName("mxxikr")
-                .accountType(null)
-                .currencyType(CurrencyType.KRW)
-                .build();
-
-            expectCreateAccountException(invalidDto, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-        }
-
-        /**
-         * 계좌 생성 실패 - 통화 종류 누락
-         */
-        @Test
-        void createAccount_fail_whenCurrencyTypeIsNull() {
-            AccountCreateRequestDTO invalidDto = AccountCreateRequestDTO.builder()
-                .accountName("mxxikr")
-                .accountType(AccountType.PERSONAL)
-                .currencyType(null)
-                .build();
-
-            expectCreateAccountException(invalidDto, ErrorCode.INVALID_REQUEST);
             verify(accountRepository, never()).save(any());
         }
     }
@@ -325,46 +271,6 @@ class AccountServiceTest {
             verify(accountRepository, never()).save(any());
             verify(transactionRepository, never()).save(any());
         }
-
-        /**
-         * 입금 실패 - null 계좌번호
-         */
-        @Test
-        void deposit_fail_whenAccountNumberIsNull() {
-            expectDepositException(null, new BigDecimal("50000"), ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 입금 실패 - null 금액
-         */
-        @Test
-        void deposit_fail_whenAmountIsNull() {
-            expectDepositException(testAccountNumber, null, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 입금 실패 - 음수 금액
-         */
-        @Test
-        void deposit_fail_whenAmountIsNegative() {
-            expectDepositException(testAccountNumber, new BigDecimal("-1000"), ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 입금 실패 - 0원 금액
-         */
-        @Test
-        void deposit_fail_whenAmountIsZero() {
-            expectDepositException(testAccountNumber, BigDecimal.ZERO, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
     }
 
     // ========================= 출금 테스트 =========================
@@ -435,46 +341,6 @@ class AccountServiceTest {
                     .when(transferPolicy).validateWithdrawAmount(eq(withdrawAmount), eq(todayTotal));
 
             expectWithdrawException(testAccountNumber, withdrawAmount, ErrorCode.EXCEEDS_WITHDRAW_LIMIT);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 출금 실패 - null 계좌번호
-         */
-        @Test
-        void withdraw_fail_whenAccountNumberIsNull() {
-            expectWithdrawException(null, new BigDecimal("30000"), ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 출금 실패 - null 금액
-         */
-        @Test
-        void withdraw_fail_whenAmountIsNull() {
-            expectWithdrawException(testAccountNumber, null, ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 출금 실패 - 음수 금액
-         */
-        @Test
-        void withdraw_fail_whenAmountIsNegative() {
-            expectWithdrawException(testAccountNumber, new BigDecimal("-1000"), ErrorCode.INVALID_REQUEST);
-            verify(accountRepository, never()).save(any());
-            verify(transactionRepository, never()).save(any());
-        }
-
-        /**
-         * 출금 실패 - 0원 금액
-         */
-        @Test
-        void withdraw_fail_whenAmountIsZero() {
-            expectWithdrawException(testAccountNumber, BigDecimal.ZERO, ErrorCode.INVALID_REQUEST);
             verify(accountRepository, never()).save(any());
             verify(transactionRepository, never()).save(any());
         }

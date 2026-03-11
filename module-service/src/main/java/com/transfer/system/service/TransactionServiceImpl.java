@@ -136,11 +136,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional(readOnly = true)
     public Page<TransactionResponseDTO> getTransactionHistory(String accountNumber, int page, int size) {
-        // 계좌번호 검증
-        if (accountNumber == null || accountNumber.trim().isEmpty()) {
-            throw new TransferSystemException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
         // 계좌 존재 여부 확인
         AccountEntity account = accountRepository.findByAccountNumber(accountNumber)
             .orElseThrow(() -> new TransferSystemException(ErrorCode.ACCOUNT_NOT_FOUND));

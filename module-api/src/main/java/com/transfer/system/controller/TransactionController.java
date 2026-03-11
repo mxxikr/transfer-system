@@ -12,11 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.NotBlank;
 
 @Tag(name = "거래 API", description = "계좌 간 이체 및 거래 내역 조회 API")
 @RestController
 @RequestMapping("/api/transaction")
 @RequiredArgsConstructor
+@Validated
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -31,7 +34,7 @@ public class TransactionController {
     @Operation(summary = "거래 내역 조회", description = "거래 내역 최신 순 조회")
     @GetMapping("/history")
     @SuccessResponse(ResponseMessage.TRANSACTION_HISTORY_RETRIEVED)
-    public Page<TransactionResponseDTO> getTransactionHistory(@RequestParam String accountNumber, @RequestParam int page, @RequestParam int size) {
+    public Page<TransactionResponseDTO> getTransactionHistory(@RequestParam @NotBlank String accountNumber, @RequestParam int page, @RequestParam int size) {
         return transactionService.getTransactionHistory(accountNumber, page, size);
     }
 }

@@ -40,19 +40,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountResponseDTO createAccount(AccountCreateRequestDTO accountCreateRequestDTO) {
-        if (accountCreateRequestDTO == null) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
-
-        if (accountCreateRequestDTO.getAccountName() == null || accountCreateRequestDTO.getAccountType() == null || accountCreateRequestDTO.getCurrencyType() == null) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
-
         String accountNumber = accountNumberGeneratorService.generateAccountNumber();
 
-        if (accountNumber == null || accountNumber.trim().isEmpty()) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
         log.debug("[AccountService] 생성된 계좌번호: {}", accountNumber);
 
         if (accountRepository.existsByAccountNumber(accountNumber)) {
@@ -112,10 +101,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public AccountBalanceResponseDTO deposit(String accountNumber, BigDecimal amount) {
-        if (accountNumber == null || amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
-
         AccountEntity accountEntity = accountRepository.findByAccountNumberLock(accountNumber)
             .orElseThrow(() -> new TransferSystemException(ErrorCode.ACCOUNT_NOT_FOUND));
         accountEntity.addBalance(amount);
@@ -146,10 +131,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public AccountBalanceResponseDTO withdraw(String accountNumber, BigDecimal amount) {
-        if (accountNumber == null || amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
-
         AccountEntity accountEntity = accountRepository.findByAccountNumberLock(accountNumber)
             .orElseThrow(() -> new TransferSystemException(ErrorCode.ACCOUNT_NOT_FOUND));
 

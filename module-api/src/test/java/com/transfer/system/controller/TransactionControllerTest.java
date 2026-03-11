@@ -184,6 +184,27 @@ class TransactionControllerTest {
         }
 
         /**
+         * 필수 파라미터가 누락된 경우
+         */
+        @Test
+        void transfer_missingFields() throws Exception {
+            TransactionRequestDTO invalidDto = TransactionRequestDTO.builder()
+                .fromAccountNumber("")
+                .toAccountNumber(null)
+                .amount(new BigDecimal("-100"))
+                .build();
+
+            mockMvc.perform(post(Endpoint.TRANSFER)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result_code").value(ResultCode.FAIL_INVALID_PARAMETER.getCode()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_REQUEST.getMessage()));
+
+            verify(transactionService, never()).transfer(any());
+        }
+
+        /**
          * 계좌번호가 존재하지 않는 경우
          */
         @Test

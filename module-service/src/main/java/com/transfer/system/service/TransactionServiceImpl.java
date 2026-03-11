@@ -42,25 +42,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TransactionResponseDTO transfer(TransactionRequestDTO transactionRequestDTO) {
-        if (transactionRequestDTO == null) {
-            throw new TransferSystemException(ErrorCode.INVALID_REQUEST);
-        }
-
         String fromAccountNumber = transactionRequestDTO.getFromAccountNumber();
         String toAccountNumber = transactionRequestDTO.getToAccountNumber();
         BigDecimal amount = transactionRequestDTO.getAmount();
 
-        if (fromAccountNumber == null || toAccountNumber == null) {
-            throw new TransferSystemException(ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
         if (fromAccountNumber.equals(toAccountNumber)) { // 같은 계좌로는 이체할 수 없음
             throw new TransferSystemException(ErrorCode.TRANSFER_SAME_ACCOUNT);
-        }
-
-        // 이체 금액 유효성 검사
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransferSystemException(ErrorCode.INVALID_AMOUNT);
         }
 
         log.debug("[TransactionService] From: {}, To: {}, Amount: {}", fromAccountNumber, toAccountNumber, amount);

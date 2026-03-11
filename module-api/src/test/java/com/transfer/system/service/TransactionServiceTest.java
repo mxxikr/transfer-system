@@ -195,42 +195,6 @@ class TransactionServiceTest {
         }
 
         /**
-         * 이체 시 null DTO
-         */
-        @Test
-        void transfer_nullDto() {
-            expectTransferException(null, ErrorCode.INVALID_REQUEST);
-        }
-
-        /**
-         * 이체 시 null 출금 계좌번호
-         */
-        @Test
-        void transfer_nullFromAccountNumber() {
-            TransactionRequestDTO dto = TransactionRequestDTO.builder()
-                .fromAccountNumber(null)
-                .toAccountNumber(testToAccountNumber)
-                .amount(new BigDecimal("100000"))
-                .build();
-
-            expectTransferException(dto, ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
-        /**
-         * 이체 시 null 입금 계좌번호
-         */
-        @Test
-        void transfer_nullToAccountNumber() {
-            TransactionRequestDTO dto = TransactionRequestDTO.builder()
-                .fromAccountNumber(testFromAccountNumber)
-                .toAccountNumber(null)
-                .amount(new BigDecimal("100000"))
-                .build();
-
-            expectTransferException(dto, ErrorCode.INVALID_ACCOUNT_NUMBER);
-        }
-
-        /**
          * 이체 시 동일 계좌 간 이체
          */
         @Test
@@ -242,34 +206,6 @@ class TransactionServiceTest {
                 .build();
 
             expectTransferException(dto, ErrorCode.TRANSFER_SAME_ACCOUNT);
-        }
-
-        /**
-         * 이체 시 유효하지 않은 금액
-         */
-        @Test
-        void transfer_withInvalidAmount() {
-            TransactionRequestDTO nullAmountDto = TransactionRequestDTO.builder()
-                .fromAccountNumber(testFromAccountNumber)
-                .toAccountNumber(testToAccountNumber)
-                .amount(null)
-                .build();
-
-            TransactionRequestDTO zeroAmountDto = TransactionRequestDTO.builder()
-                .fromAccountNumber(testFromAccountNumber)
-                .toAccountNumber(testToAccountNumber)
-                .amount(BigDecimal.ZERO)
-                .build();
-
-            TransactionRequestDTO negativeAmountDto = TransactionRequestDTO.builder()
-                .fromAccountNumber(testFromAccountNumber)
-                .toAccountNumber(testToAccountNumber)
-                .amount(new BigDecimal("-1000"))
-                .build();
-
-            expectTransferException(nullAmountDto, ErrorCode.INVALID_AMOUNT);
-            expectTransferException(zeroAmountDto, ErrorCode.INVALID_AMOUNT);
-            expectTransferException(negativeAmountDto, ErrorCode.INVALID_AMOUNT);
         }
 
         /**

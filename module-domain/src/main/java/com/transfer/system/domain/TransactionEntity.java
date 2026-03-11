@@ -7,10 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Table(name = "transaction_entity")
-public class TransactionEntity {
+public class TransactionEntity extends BaseCreatedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "BINARY(16)")
@@ -43,6 +41,4 @@ public class TransactionEntity {
 
     @Column(precision = 19, scale = 2)
     private BigDecimal fee; // 수수료
-
-    private LocalDateTime createdTimeStamp; // 거래 생성 일시
 }

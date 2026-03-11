@@ -16,11 +16,11 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "account_entity")
-public class AccountEntity {
+@Builder
+public class AccountEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "BINARY(16)")
@@ -45,24 +45,17 @@ public class AccountEntity {
     @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus; // 계좌 상태
 
-    @Column(updatable = false)
-    private LocalDateTime createdTimeStamp; // 계좌 생성 일시
-
-    private LocalDateTime updatedTimeStamp; // 계좌 정보 수정 일시
-
     // 출금
     public void subtractBalance(BigDecimal amount) {
         if (this.balance.compareTo(amount) < 0) { // 잔액 부족 여부 확인
             throw new TransferSystemException(ErrorCode.INSUFFICIENT_BALANCE);
         }
         this.balance = MoneyUtils.normalize(this.balance.subtract(amount));
-        this.updatedTimeStamp = TimeUtils.nowKstLocalDateTime();
     }
 
     // 입금
     public void addBalance(BigDecimal amount) {
         this.balance = MoneyUtils.normalize(this.balance.add(amount));
-        this.updatedTimeStamp = TimeUtils.nowKstLocalDateTime();
     }
 
     // 계좌 잔액 업데이트
@@ -71,6 +64,5 @@ public class AccountEntity {
             throw new TransferSystemException(ErrorCode.NEGATIVE_BALANCE);
         }
         this.balance = MoneyUtils.normalize(newBalance);
-        this.updatedTimeStamp = TimeUtils.nowKstLocalDateTime();
     }
 }

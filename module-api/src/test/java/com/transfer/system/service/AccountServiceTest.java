@@ -82,7 +82,6 @@ class AccountServiceTest {
                 .transactionType(TransactionType.DEPOSIT)
                 .amount(new BigDecimal("50000"))
                 .fee(BigDecimal.ZERO)
-                .createdTimeStamp(TimeUtils.nowKstLocalDateTime())
                 .build();
 
         lenient().when(accountRepository.save(any(AccountEntity.class))).thenAnswer(inv -> inv.getArgument(0));

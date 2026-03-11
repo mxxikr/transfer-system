@@ -103,7 +103,6 @@ class TransactionServiceTest {
             .transactionType(TransactionType.TRANSFER)
             .amount(new BigDecimal("100000"))
             .fee(new BigDecimal("1000"))
-            .createdTimeStamp(TimeUtils.nowKstLocalDateTime())
             .build();
     }
 

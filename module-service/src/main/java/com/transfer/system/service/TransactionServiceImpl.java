@@ -102,7 +102,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(TransactionType.TRANSFER)
                 .amount(amount)
                 .fee(fee)
-                .createdTimeStamp(TimeUtils.nowKstLocalDateTime())
                 .build();
 
         TransactionEntity savedTransactionEntity = transactionRepository.save(transactionEntity);

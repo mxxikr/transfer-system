@@ -484,21 +484,3 @@
   * 기본 페이지 크기: 10
   * 최대 페이지 크기: 100
   * 거래 정렬 필드: `createdTimeStamp`
-
-<br>
-
-## 사용 라이브러리
-- spring-boot-starter-web
-  - RESTful API 서버 구성
-- spring-boot-starter-data-jpa
-  - Spring Data JPA 기반 ORM 및 Repository 구성
-- springdoc-openapi-starter-webmvc-ui
-  - Swagger 문서 자동 생성
-- flyway-core
-  - 데이터베이스 마이그레이션 관리
-- H2 Database
-  - 테스트 및 로컬 개발용 인메모리 DB
-- lombok
-  - DTO, Entity 클래스의 Getter/Setter/Builder 자동 생성
-- spring-boot-starter-test
-  - JUnit 기반 단위 테스트 환경 구성

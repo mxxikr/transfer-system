@@ -1,6 +1,7 @@
 package com.transfer.system.repository;
 
 import com.transfer.system.account.AccountTestApplication;
+import com.transfer.system.config.QueryDslConfig;
 import com.transfer.system.domain.AccountEntity;
 import com.transfer.system.enums.AccountStatus;
 import com.transfer.system.enums.AccountType;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -29,6 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = AccountTestApplication.class)
+@Import(QueryDslConfig.class)
 class AccountRepositoryTest {
 
     @Autowired
@@ -41,7 +44,7 @@ class AccountRepositoryTest {
     private static final String testToAccountNumber = "00125080800002";
 
     /**
-     * 테스트용 계좌
+     * 테스트용 계좌 생성 및 저장
      */
     private AccountEntity createTestAccount(String accountNumber, String accountName, BigDecimal balance) {
         return AccountEntity.builder()
@@ -193,6 +196,19 @@ class AccountRepositoryTest {
             Optional<AccountEntity> foundAccount = accountRepository.findByAccountNumber(testFromAccountNumber);
 
             assertThat(foundAccount).isPresent();
+        }
+
+        /**
+         * 계좌번호로 계좌 비관적 락 조회 성공
+         */
+        @Test
+        void findByAccountNumberLock_success() {
+            saveAccount(testFromAccountNumber, "mxxikr", new BigDecimal("100000"));
+
+            Optional<AccountEntity> foundAccount = accountRepository.findByAccountNumberLock(testFromAccountNumber);
+
+            assertThat(foundAccount).isPresent();
+            assertThat(foundAccount.get().getAccountNumber()).isEqualTo(testFromAccountNumber);
         }
     }
 

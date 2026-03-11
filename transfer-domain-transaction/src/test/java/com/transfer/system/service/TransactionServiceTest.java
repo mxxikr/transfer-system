@@ -285,13 +285,13 @@ class TransactionServiceTest {
             Page<TransactionEntity> transactionPage = new PageImpl<>(transactions);
 
             when(accountRepository.findByAccountNumber(testFromAccountNumber)).thenReturn(Optional.of(fromAccountEntity));
-            when(transactionRepository.findAllByAccount(eq(fromAccountEntity), any(Pageable.class))).thenReturn(transactionPage);
+            when(transactionRepository.findAllByAccountWithFetchJoin(eq(fromAccountEntity), any(Pageable.class))).thenReturn(transactionPage);
 
             Page<TransactionEntity> result = transactionService.getTransactionHistory(testFromAccountNumber, 0, 10);
 
             assertNotNull(result);
             assertEquals(1, result.getTotalElements());
-            verify(transactionRepository).findAllByAccount(eq(fromAccountEntity), any(Pageable.class));
+            verify(transactionRepository).findAllByAccountWithFetchJoin(eq(fromAccountEntity), any(Pageable.class));
         }
 
         /**

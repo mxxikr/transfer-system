@@ -1,5 +1,6 @@
 package com.transfer.system.repository;
 
+import com.transfer.system.config.QueryDslConfig;
 import com.transfer.system.domain.AccountEntity;
 import com.transfer.system.domain.TransactionEntity;
 import com.transfer.system.enums.AccountStatus;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = TransactionTestApplication.class)
+@Import(QueryDslConfig.class)
 class TransactionRepositoryTest {
 
     @Autowired
@@ -73,8 +76,6 @@ class TransactionRepositoryTest {
             .fee(fee)
             .build();
         
-        // 특정 시간(과거 등)을 강제로 넣어야 하는 테스트가 있다면 Reflection 등으로 처리하거나 
-        // 여기서는 Auditing을 따르도록 합니다. (테스트 케이스에 따라 수정 필요)
         return entityManager.persistAndFlush(transactionEntity);
     }
 
@@ -158,7 +159,7 @@ class TransactionRepositoryTest {
             testTransactionEntity(a2, a3, TransactionType.TRANSFER, new BigDecimal("5000"),  new BigDecimal("100"), null);
 
             Pageable pageable = PageRequest.of(0, 10);
-            Page<TransactionEntity> page = transactionRepository.findAllByAccount(a1, pageable);
+            Page<TransactionEntity> page = transactionRepository.findAllByAccountWithFetchJoin(a1, pageable);
 
             assertThat(page.getTotalElements()).isEqualTo(2);
         }
@@ -174,7 +175,7 @@ class TransactionRepositoryTest {
 
             testTransactionEntity(a1, a2, TransactionType.TRANSFER, new BigDecimal("10000"), new BigDecimal("0"), null);
 
-            Page<TransactionEntity> page = transactionRepository.findAllByAccount(empty, PageRequest.of(0, 10));
+            Page<TransactionEntity> page = transactionRepository.findAllByAccountWithFetchJoin(empty, PageRequest.of(0, 10));
             assertThat(page.getTotalElements()).isZero();
             assertThat(page.getContent()).isEmpty();
         }
@@ -191,7 +192,7 @@ class TransactionRepositoryTest {
                 testTransactionEntity(fromAccount, toAccount, TransactionType.TRANSFER, new BigDecimal("1000"), BigDecimal.ZERO, null);
             }
 
-            Page<TransactionEntity> page = transactionRepository.findAllByAccount(fromAccount, PageRequest.of(0, 5));
+            Page<TransactionEntity> page = transactionRepository.findAllByAccountWithFetchJoin(fromAccount, PageRequest.of(0, 5));
             assertThat(page.getContent()).hasSize(5);
             assertThat(page.getTotalElements()).isEqualTo(12);
         }

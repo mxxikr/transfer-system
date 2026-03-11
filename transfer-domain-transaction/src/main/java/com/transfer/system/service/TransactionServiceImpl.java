@@ -201,7 +201,7 @@ public class TransactionServiceImpl implements TransactionService {
         // 페이징은 컨트롤러 또는 API 레이어에서 처리하도록 하고 여기서는 직접 Pageable 생성
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdTimeStamp").descending());
 
-        Page<TransactionEntity> transactions = transactionRepository.findAllByAccount(account, pageable);
+        Page<TransactionEntity> transactions = transactionRepository.findAllByAccountWithFetchJoin(account, pageable);
 
         log.info("[TransactionService] 거래 내역 조회 완료: 총 {}건, 현재 페이지 {}건", transactions.getTotalElements(), transactions.getNumberOfElements());
 

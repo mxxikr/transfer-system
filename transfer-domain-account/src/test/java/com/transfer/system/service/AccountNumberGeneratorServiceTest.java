@@ -1,6 +1,7 @@
 package com.transfer.system.service;
 
 import com.transfer.system.account.AccountTestApplication;
+import com.transfer.system.config.QueryDslConfig;
 import com.transfer.system.domain.AccountNumberEntity;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJpaTest
-@Import(AccountNumberGeneratorService.class)
+@Import({AccountNumberGeneratorService.class, QueryDslConfig.class})
 @ContextConfiguration(classes = AccountTestApplication.class)
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -31,49 +32,40 @@ class AccountNumberGeneratorServiceTest {
     @Autowired
     private AccountNumberGeneratorService accountNumberGeneratorService;
 
-    private static final String ACCOUNT_PREFIX = "001";
-
-    // ========================== 계좌 번호 생성 테스트 =========================
     @Nested
     class GenerateAccountNumberTest {
 
-        /**
-         * 시퀀스가 이미 존재할 경우
-         */
-        @Test
-        void generateAccountNumber_whenSequenceExists() {
-            LocalDate today = LocalDate.now();
-            AccountNumberEntity existingSequence = new AccountNumberEntity(today, 1L);
-            testEntityManager.persistAndFlush(existingSequence);
-
-            String newAccountNumber = accountNumberGeneratorService.generateAccountNumber();
-
-            String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
-            String expectedAccountNumber = ACCOUNT_PREFIX + datePart + "00002";
-            assertNotNull(newAccountNumber);
-            assertEquals(expectedAccountNumber, newAccountNumber);
-
-            AccountNumberEntity updatedSequence = testEntityManager.find(AccountNumberEntity.class, today);
-            assertEquals(2L, updatedSequence.getLastNumber());
-        }
-
-        /**
-         * 오늘 날짜의 시퀀스가 없을 경우
-         */
         @Test
         void generateAccountNumber_whenSequenceIsNew() {
+            String accountNumber = accountNumberGeneratorService.generateAccountNumber();
+
             LocalDate today = LocalDate.now();
-
-            String newAccountNumber = accountNumberGeneratorService.generateAccountNumber();
-
             String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
-            String expectedAccountNumber = ACCOUNT_PREFIX + datePart + "00001";
-            assertNotNull(newAccountNumber);
-            assertEquals(expectedAccountNumber, newAccountNumber);
+            String expected = "001" + datePart + "00001";
+            
+            assertNotNull(accountNumber);
+            assertEquals(14, accountNumber.length());
+            assertEquals(expected, accountNumber);
 
             AccountNumberEntity createdSequence = testEntityManager.find(AccountNumberEntity.class, today);
             assertNotNull(createdSequence);
             assertEquals(1L, createdSequence.getLastNumber());
+        }
+
+        @Test
+        void generateAccountNumber_whenSequenceExists() {
+            LocalDate today = LocalDate.now();
+            AccountNumberEntity existingSequence = new AccountNumberEntity(today, 5L);
+            testEntityManager.persistAndFlush(existingSequence);
+
+            String accountNumber = accountNumberGeneratorService.generateAccountNumber();
+
+            String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
+            String expected = "001" + datePart + "00006";
+            assertEquals(expected, accountNumber);
+
+            AccountNumberEntity updatedSequence = testEntityManager.find(AccountNumberEntity.class, today);
+            assertEquals(6L, updatedSequence.getLastNumber());
         }
     }
 }

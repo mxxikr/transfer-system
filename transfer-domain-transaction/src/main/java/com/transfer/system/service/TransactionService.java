@@ -8,9 +8,9 @@ import java.math.BigDecimal;
 
 public interface TransactionService {
     /**
-     * 이체 기능
+     * 핵심 이체 비즈니스 로직 (락 획득 후 실행)
      */
-    TransactionEntity transfer(String fromAccountNumber, String toAccountNumber, BigDecimal amount);
+    TransactionEntity executeTransfer(AccountEntity fromAccount, AccountEntity toAccount, BigDecimal amount);
 
     /**
      * 계좌 입금

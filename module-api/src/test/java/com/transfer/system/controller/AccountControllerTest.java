@@ -9,6 +9,7 @@ import com.transfer.system.enums.AccountType;
 import com.transfer.system.enums.CurrencyType;
 import com.transfer.system.enums.ResultCode;
 import com.transfer.system.enums.ResponseMessage;
+import com.transfer.system.exception.CommonResponseAdvice;
 import com.transfer.system.exception.ErrorCode;
 import com.transfer.system.exception.GlobalExceptionHandler;
 import com.transfer.system.exception.TransferSystemException;
@@ -64,7 +65,7 @@ class AccountControllerTest {
     void setUp() {
         AccountController accountController = new AccountController(accountService);
         mockMvc = MockMvcBuilders.standaloneSetup(accountController)
-            .setControllerAdvice(new GlobalExceptionHandler())
+            .setControllerAdvice(new GlobalExceptionHandler(), new CommonResponseAdvice())
             .build();
 
         accountCreateRequestDTO = AccountCreateRequestDTO.builder()

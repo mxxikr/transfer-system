@@ -5,6 +5,7 @@ import com.transfer.system.dto.TransactionResponseDTO;
 import com.transfer.system.enums.ResultCode;
 import com.transfer.system.enums.ResponseMessage;
 import com.transfer.system.enums.TransactionType;
+import com.transfer.system.exception.CommonResponseAdvice;
 import com.transfer.system.exception.ErrorCode;
 import com.transfer.system.exception.GlobalExceptionHandler;
 import com.transfer.system.exception.TransferSystemException;
@@ -62,7 +63,7 @@ class TransactionControllerTest {
     void setUp() {
         TransactionController transactionController = new TransactionController(transactionService);
         mockMvc = MockMvcBuilders.standaloneSetup(transactionController)
-            .setControllerAdvice(new GlobalExceptionHandler())
+            .setControllerAdvice(new GlobalExceptionHandler(), new CommonResponseAdvice())
             .build();
 
         transactionRequestDTO = TransactionRequestDTO.builder()

@@ -1,5 +1,6 @@
 package com.transfer.system.controller;
 
+import com.transfer.system.annotation.SuccessResponse;
 import com.transfer.system.dto.*;
 import com.transfer.system.enums.ResponseMessage;
 import com.transfer.system.service.AccountService;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,41 +21,36 @@ public class AccountController {
 
     @Operation(summary = "계좌 생성")
     @PostMapping("/create")
-    public ResponseEntity<CommonResponseDTO<AccountResponseDTO>> createAccount(@Valid @RequestBody AccountCreateRequestDTO AccountCreateRequestDTO) {
-        AccountResponseDTO response = accountService.createAccount(AccountCreateRequestDTO);
-
-        return ResponseEntity.ok(CommonResponseDTO.successHasData(response, ResponseMessage.ACCOUNT_CREATED.getMessage()));
+    @SuccessResponse(ResponseMessage.ACCOUNT_CREATED)
+    public AccountResponseDTO createAccount(@Valid @RequestBody AccountCreateRequestDTO AccountCreateRequestDTO) {
+        return accountService.createAccount(AccountCreateRequestDTO);
     }
 
     @Operation(summary = "계좌 조회")
     @GetMapping("/{accountId}")
-    public ResponseEntity<CommonResponseDTO<AccountResponseDTO>> getAccount(@PathVariable UUID accountId) {
-        AccountResponseDTO response = accountService.getAccount(accountId);
-
-        return ResponseEntity.ok(CommonResponseDTO.successHasData(response, ResponseMessage.ACCOUNT_RETRIEVED.getMessage()));
+    @SuccessResponse(ResponseMessage.ACCOUNT_RETRIEVED)
+    public AccountResponseDTO getAccount(@PathVariable UUID accountId) {
+        return accountService.getAccount(accountId);
     }
 
     @Operation(summary = "계좌 삭제")
     @DeleteMapping("/{accountId}")
-    public ResponseEntity<CommonResponseDTO<Void>> deleteAccount(@PathVariable UUID accountId) {
+    @SuccessResponse(ResponseMessage.ACCOUNT_DELETED)
+    public void deleteAccount(@PathVariable UUID accountId) {
         accountService.deleteAccount(accountId);
-
-        return ResponseEntity.ok(CommonResponseDTO.successNoData(ResponseMessage.ACCOUNT_DELETED.getMessage()));
     }
 
     @Operation(summary = "입금 처리")
     @PostMapping("/deposit")
-    public ResponseEntity<CommonResponseDTO<AccountBalanceResponseDTO>> deposit(@Valid @RequestBody AccountBalanceRequestDTO accountBalanceRequestDTO) {
-        AccountBalanceResponseDTO response = accountService.deposit(accountBalanceRequestDTO.getAccountNumber(), accountBalanceRequestDTO.getAmount());
-
-        return ResponseEntity.ok(CommonResponseDTO.successHasData(response, ResponseMessage.DEPOSIT_SUCCESSFUL.getMessage()));
+    @SuccessResponse(ResponseMessage.DEPOSIT_SUCCESSFUL)
+    public AccountBalanceResponseDTO deposit(@Valid @RequestBody AccountBalanceRequestDTO accountBalanceRequestDTO) {
+        return accountService.deposit(accountBalanceRequestDTO.getAccountNumber(), accountBalanceRequestDTO.getAmount());
     }
 
     @Operation(summary = "출금 처리", description = "일 한도 : 1,000,000원")
     @PostMapping("/withdraw")
-    public ResponseEntity<CommonResponseDTO<AccountBalanceResponseDTO>> withdraw(@Valid @RequestBody AccountBalanceRequestDTO accountBalanceRequestDTO) {
-        AccountBalanceResponseDTO response = accountService.withdraw(accountBalanceRequestDTO.getAccountNumber(), accountBalanceRequestDTO.getAmount());
-
-        return ResponseEntity.ok(CommonResponseDTO.successHasData(response, ResponseMessage.WITHDRAW_SUCCESSFUL.getMessage()));
+    @SuccessResponse(ResponseMessage.WITHDRAW_SUCCESSFUL)
+    public AccountBalanceResponseDTO withdraw(@Valid @RequestBody AccountBalanceRequestDTO accountBalanceRequestDTO) {
+        return accountService.withdraw(accountBalanceRequestDTO.getAccountNumber(), accountBalanceRequestDTO.getAmount());
     }
 }

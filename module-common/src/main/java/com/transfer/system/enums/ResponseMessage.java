@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ResponseMessage {
+    SUCCESS("요청이 성공적으로 처리되었습니다."),
     // ACCOUNT
     ACCOUNT_CREATED("계좌 생성이 완료되었습니다."),
     ACCOUNT_RETRIEVED("계좌 조회가 완료되었습니다."),

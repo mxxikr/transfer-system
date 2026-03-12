@@ -1,11 +1,14 @@
 # 계좌 간 송금 시스템
+
 ## 프로젝트 개요
+
 - 본 프로젝트는 Spring Boot와 JPA를 사용하여 계좌 간 송금 시스템의 핵심 기능을 구현한 백엔드 API 서버입니다.
 - RESTful API를 통해 계좌 관리, 입출금, 이체, 거래 내역 조회 기능을 제공하며 Docker Compose를 사용하여 실행 환경을 구축할 수 있습니다.
 
 <br>
 
 ## 기술 스택
+
 - Backend
   - Java 21
   - Spring Boot 3.5.4
@@ -19,6 +22,82 @@
   - Docker, Docker Compose
 - API Documentation
   - Swagger
+
+<br>
+
+## 시스템 아키텍처
+
+```mermaid
+graph TD
+    API[transfer-api] --> CORE[transfer-core]
+    API --> TRAN[transfer-domain-transaction]
+    API --> ACC[transfer-domain-account]
+    TRAN --> ACC
+    TRAN --> CORE
+    ACC --> CORE
+
+    subgraph "Presentation Layer"
+        API
+    end
+
+    subgraph "Domain Layer"
+        TRAN
+        ACC
+    end
+
+    subgraph "Common Layer"
+        CORE
+    end
+```
+
+### 모듈별 역할
+
+- **transfer-api**
+  - 애플리케이션의 진입점으로 REST API 컨트롤러, DTO, 전역 예외 처리를 담당
+- **transfer-domain-transaction**
+  - 송금, 이체 등 거래 관련 비즈니스 로직과 도메인 모델을 포함
+- **transfer-domain-account**
+  - 계좌 생성, 조회, 잔액 관리 등 계좌 관련 도메인 로직을 담당
+- **transfer-core**
+  - 공통 유틸리티, 공통 에러 코드, 열거형(Enums) 등 전 모듈에서 공유하는 코드를 관리
+
+<br>
+
+## ERD (Entity Relationship Diagram)
+
+```mermaid
+erDiagram
+    ACCOUNT_ENTITY {
+        UUID account_id PK
+        String account_number UK
+        String account_name
+        String bank_name
+        String account_type
+        String currency_type
+        BigDecimal balance
+        String account_status
+        LocalDateTime created_time_stamp
+        LocalDateTime updated_time_stamp
+    }
+
+    TRANSACTION_ENTITY {
+        UUID transaction_id PK
+        UUID from_account_id FK
+        UUID to_account_id FK
+        String transaction_type
+        BigDecimal amount
+        BigDecimal fee
+        LocalDateTime created_time_stamp
+    }
+
+    ACCOUNT_NUMBER_SEQUENCE {
+        LocalDate id PK
+        Long last_number
+    }
+
+    ACCOUNT_ENTITY ||--o{ TRANSACTION_ENTITY : "출금(from)"
+    ACCOUNT_ENTITY ||--o{ TRANSACTION_ENTITY : "입금(to)"
+```
 
 <br>
 
@@ -45,22 +124,21 @@
 1. Docker Desktop 실행
 
 2. 프로젝트 클론 및 빌드
-   
-    ```bash
-    git clone {github_url}
-    cd {directory_name}
-    ```
-   
+
+   ```bash
+   git clone {github_url}
+   cd {directory_name}
+   ```
+
 3. 다음 명령어로 컨테이너 실행
 
-    ```bash
+   ```bash
    ./gradlew clean :module-api:bootJar
-    docker compose up --build
-    ```
+   docker compose up --build
+   ```
 
 4. 서버 실행 확인 및 Swagger UI 접속
-
-    - http://localhost:8080/swagger-ui/index.html
+   - http://localhost:8080/swagger-ui/index.html
 
 <br>
 
@@ -68,13 +146,13 @@
 
 ### 계좌 생성
 
-* **Endpoint**
-    - `/api/account/create`
-* **Method**
-    - `POST`
-* **Description**
-    - 새로운 계좌를 생성함
-* **Request Body**
+- **Endpoint**
+  - `/api/account/create`
+- **Method**
+  - `POST`
+- **Description**
+  - 새로운 계좌를 생성함
+- **Request Body**
 
   ```json
   {
@@ -83,20 +161,21 @@
     "currencyType": "KRW"
   }
   ```
+
   ```json
   {
     "result_code": 1,
     "data": {
-        "accountId": "7abc0907-2df8-421d-b54a-f440c9bbb056",
-        "accountNumber": "00125081300001",
-        "accountName": "Test Account",
-        "bankName": "mxxikrBank",
-        "accountType": "PERSONAL",
-        "currencyType": "KRW",
-        "balance": 0,
-        "accountStatus": "ACTIVE",
-        "createdTimeStamp": "2025-08-13T14:41:42.750121863",
-        "updatedTimeStamp": "2025-08-13T14:41:42.750138194"
+      "accountId": "7abc0907-2df8-421d-b54a-f440c9bbb056",
+      "accountNumber": "00125081300001",
+      "accountName": "Test Account",
+      "bankName": "mxxikrBank",
+      "accountType": "PERSONAL",
+      "currencyType": "KRW",
+      "balance": 0,
+      "accountStatus": "ACTIVE",
+      "createdTimeStamp": "2025-08-13T14:41:42.750121863",
+      "updatedTimeStamp": "2025-08-13T14:41:42.750138194"
     },
     "message": "계좌 생성이 완료되었습니다.",
     "timestamp": "2025-08-13T14:41:42.769402851"
@@ -105,30 +184,30 @@
 
 ### 계좌 조회
 
-* **Endpoint**
-    - `/api/account/{accountId}`
-* **Method**
-    - `GET`
-* **Description**
-    - 계좌의 상세 정보를 조회함
-* **Path Variable**
-    - `accountId` (UUID)
-* **Response Body**
+- **Endpoint**
+  - `/api/account/{accountId}`
+- **Method**
+  - `GET`
+- **Description**
+  - 계좌의 상세 정보를 조회함
+- **Path Variable**
+  - `accountId` (UUID)
+- **Response Body**
 
   ```json
   {
     "result_code": 1,
     "data": {
-        "accountId": "7abc0907-2df8-421d-b54a-f440c9bbb056",
-        "accountNumber": "00125081300001",
-        "accountName": "Test Account",
-        "bankName": "mxxikrBank",
-        "accountType": "PERSONAL",
-        "currencyType": "KRW",
-        "balance": 0.00,
-        "accountStatus": "ACTIVE",
-        "createdTimeStamp": "2025-08-13T14:41:42.750122",
-        "updatedTimeStamp": "2025-08-13T14:41:42.750138"
+      "accountId": "7abc0907-2df8-421d-b54a-f440c9bbb056",
+      "accountNumber": "00125081300001",
+      "accountName": "Test Account",
+      "bankName": "mxxikrBank",
+      "accountType": "PERSONAL",
+      "currencyType": "KRW",
+      "balance": 0.0,
+      "accountStatus": "ACTIVE",
+      "createdTimeStamp": "2025-08-13T14:41:42.750122",
+      "updatedTimeStamp": "2025-08-13T14:41:42.750138"
     },
     "message": "계좌 조회가 완료되었습니다.",
     "timestamp": "2025-08-13T14:45:30.398245756"
@@ -137,13 +216,13 @@
 
 ### 계좌 삭제
 
-* **Endpoint**
-    - `/api/account/{accountId}`
-* **Method**
-    - `DELETE`
-* **Description**
-    - 계좌를 삭제 처리함
-* **Response Body**
+- **Endpoint**
+  - `/api/account/{accountId}`
+- **Method**
+  - `DELETE`
+- **Description**
+  - 계좌를 삭제 처리함
+- **Response Body**
 
   ```json
   {
@@ -156,13 +235,13 @@
 
 ### 입금 처리
 
-* **Endpoint**
-    - `/api/account/deposit`
-* **Method**
-    - `POST`
-* **Description**
-    - 특정 계좌에 입금 처리함
-* **Request Body**
+- **Endpoint**
+  - `/api/account/deposit`
+- **Method**
+  - `POST`
+- **Description**
+  - 특정 계좌에 입금 처리함
+- **Request Body**
 
   ```json
   {
@@ -170,15 +249,16 @@
     "amount": 100000
   }
   ```
-* **Response Body**
+
+- **Response Body**
 
   ```json
   {
     "result_code": 1,
     "data": {
-        "accountNumber": "00125081300001",
-        "amount": 10000.00,
-        "balance": 40000.00
+      "accountNumber": "00125081300001",
+      "amount": 10000.0,
+      "balance": 40000.0
     },
     "message": "입금이 완료되었습니다.",
     "timestamp": "2025-08-13T15:39:16.547038319"
@@ -187,14 +267,14 @@
 
 ### 출금 처리
 
-* **Endpoint**
-    - `/api/account/withdraw`
-* **Method**
-    - `POST`
-* **Description**
-    - 특정 계좌에서 출금 처리함
-    - 일일 출금 한도 : 1,000,000원
-* **Request Body**
+- **Endpoint**
+  - `/api/account/withdraw`
+- **Method**
+  - `POST`
+- **Description**
+  - 특정 계좌에서 출금 처리함
+  - 일일 출금 한도 : 1,000,000원
+- **Request Body**
 
   ```json
   {
@@ -202,14 +282,15 @@
     "amount": 100000
   }
   ```
-* **Response Body**
+
+- **Response Body**
 
   ```json
   {
     "data": {
-        "accountNumber": "00125081400001",
-        "amount": 10000.00,
-        "balance": 10000.00
+      "accountNumber": "00125081400001",
+      "amount": 10000.0,
+      "balance": 10000.0
     },
     "message": "출금이 완료되었습니다.",
     "timestamp": "2025-08-14T12:10:19.207306584",
@@ -219,14 +300,14 @@
 
 ### 계좌 이체
 
-* **Endpoint**
-    - `/api/transaction/transfer`
-* **Method**
-    - `POST`
-* **Description**
-    - 송신 계좌에서 수신 계좌로 이체를 진행함
-    - 수수료 : 이체 금액의 1%
-* **Request Body**
+- **Endpoint**
+  - `/api/transaction/transfer`
+- **Method**
+  - `POST`
+- **Description**
+  - 송신 계좌에서 수신 계좌로 이체를 진행함
+  - 수수료 : 이체 금액의 1%
+- **Request Body**
 
   ```json
   {
@@ -235,19 +316,20 @@
     "amount": 100
   }
   ```
-* **Response Body**
+
+- **Response Body**
 
   ```json
   {
     "result_code": 1,
     "data": {
-        "transactionId": "9232e60a-2e11-466e-be8d-e237918a551f",
-        "fromAccountNumber": "00125081300002",
-        "toAccountNumber": "00125081300003",
-        "transactionType": "TRANSFER",
-        "amount": 100,
-        "fee": 1.00,
-        "createdTimeStamp": "2025-08-13T14:53:49.008178389"
+      "transactionId": "9232e60a-2e11-466e-be8d-e237918a551f",
+      "fromAccountNumber": "00125081300002",
+      "toAccountNumber": "00125081300003",
+      "transactionType": "TRANSFER",
+      "amount": 100,
+      "fee": 1.0,
+      "createdTimeStamp": "2025-08-13T14:53:49.008178389"
     },
     "message": "이체가 완료되었습니다.",
     "timestamp": "2025-08-13T14:53:49.01116192"
@@ -256,108 +338,108 @@
 
 ### 거래 내역 조회
 
-* **Endpoint**
-    - `/api/transaction/history/`
-* **Method**
-    - `GET`
-* **Description**
-    - 특정 계좌의 거래 내역을 최신 순으로 페이징 조회함
-* **Query Parameters**
+- **Endpoint**
+  - `/api/transaction/history/`
+- **Method**
+  - `GET`
+- **Description**
+  - 특정 계좌의 거래 내역을 최신 순으로 페이징 조회함
+- **Query Parameters**
+  - `accountNumber`: 조회할 계좌 번호
+  - `page`: 페이지 번호(0부터 시작)
+  - `size`: 한 페이지에 보여줄 개수
 
-    * `accountNumber`: 조회할 계좌 번호
-    * `page`: 페이지 번호(0부터 시작)
-    * `size`: 한 페이지에 보여줄 개수
-* **Response Body**
+- **Response Body**
 
   ```json
   {
     "result_code": 1,
     "data": {
-        "content": [
-            {
-                "transactionId": "9232e60a-2e11-466e-be8d-e237918a551f",
-                "fromAccountNumber": "00125081300002",
-                "toAccountNumber": "00125081300003",
-                "transactionType": "TRANSFER",
-                "amount": 100.00,
-                "fee": 1.00,
-                "createdTimeStamp": "2025-08-13T14:53:49.008178"
-            },
-            {
-                "transactionId": "2cf08c1a-bb67-42d5-8729-063af05a1585",
-                "fromAccountNumber": "00125081300002",
-                "toAccountNumber": "00125081300003",
-                "transactionType": "TRANSFER",
-                "amount": 1.00,
-                "fee": 0.01,
-                "createdTimeStamp": "2025-08-13T14:53:42.627225"
-            },
-            {
-                "transactionId": "24fbb88f-59e9-4559-a9e5-e91fc1e93c6c",
-                "toAccountNumber": "00125081300002",
-                "transactionType": "DEPOSIT",
-                "amount": 10000.00,
-                "fee": 0.00,
-                "createdTimeStamp": "2025-08-13T14:53:30.059751"
-            },
-            {
-                "transactionId": "d9c7add9-b115-4608-894c-a01a83fb3a77",
-                "toAccountNumber": "00125081300002",
-                "transactionType": "DEPOSIT",
-                "amount": 10000.00,
-                "fee": 0.00,
-                "createdTimeStamp": "2025-08-13T14:53:29.399545"
-            },
-            {
-                "transactionId": "a853d9c7-51a7-4162-8994-ba6bd0fe9562",
-                "toAccountNumber": "00125081300002",
-                "transactionType": "DEPOSIT",
-                "amount": 10000.00,
-                "fee": 0.00,
-                "createdTimeStamp": "2025-08-13T14:53:28.742858"
-            },
-            {
-                "transactionId": "0f977d23-1192-47c2-b1e5-ea55e97d8b5c",
-                "fromAccountNumber": "00125081300002",
-                "transactionType": "WITHDRAW",
-                "amount": 10000.00,
-                "fee": 0.00,
-                "createdTimeStamp": "2025-08-13T14:51:20.361416"
-            },
-            {
-                "transactionId": "e7aa77fc-f456-4009-9e4b-ddaf715fb867",
-                "toAccountNumber": "00125081300002",
-                "transactionType": "DEPOSIT",
-                "amount": 10000.00,
-                "fee": 0.00,
-                "createdTimeStamp": "2025-08-13T14:49:29.473054"
-            }
-        ],
-        "pageable": {
-            "pageNumber": 0,
-            "pageSize": 10,
-            "sort": {
-                "sorted": true,
-                "empty": false,
-                "unsorted": false
-            },
-            "offset": 0,
-            "paged": true,
-            "unpaged": false
+      "content": [
+        {
+          "transactionId": "9232e60a-2e11-466e-be8d-e237918a551f",
+          "fromAccountNumber": "00125081300002",
+          "toAccountNumber": "00125081300003",
+          "transactionType": "TRANSFER",
+          "amount": 100.0,
+          "fee": 1.0,
+          "createdTimeStamp": "2025-08-13T14:53:49.008178"
         },
-        "last": true,
-        "totalElements": 7,
-        "totalPages": 1,
-        "size": 10,
-        "number": 0,
+        {
+          "transactionId": "2cf08c1a-bb67-42d5-8729-063af05a1585",
+          "fromAccountNumber": "00125081300002",
+          "toAccountNumber": "00125081300003",
+          "transactionType": "TRANSFER",
+          "amount": 1.0,
+          "fee": 0.01,
+          "createdTimeStamp": "2025-08-13T14:53:42.627225"
+        },
+        {
+          "transactionId": "24fbb88f-59e9-4559-a9e5-e91fc1e93c6c",
+          "toAccountNumber": "00125081300002",
+          "transactionType": "DEPOSIT",
+          "amount": 10000.0,
+          "fee": 0.0,
+          "createdTimeStamp": "2025-08-13T14:53:30.059751"
+        },
+        {
+          "transactionId": "d9c7add9-b115-4608-894c-a01a83fb3a77",
+          "toAccountNumber": "00125081300002",
+          "transactionType": "DEPOSIT",
+          "amount": 10000.0,
+          "fee": 0.0,
+          "createdTimeStamp": "2025-08-13T14:53:29.399545"
+        },
+        {
+          "transactionId": "a853d9c7-51a7-4162-8994-ba6bd0fe9562",
+          "toAccountNumber": "00125081300002",
+          "transactionType": "DEPOSIT",
+          "amount": 10000.0,
+          "fee": 0.0,
+          "createdTimeStamp": "2025-08-13T14:53:28.742858"
+        },
+        {
+          "transactionId": "0f977d23-1192-47c2-b1e5-ea55e97d8b5c",
+          "fromAccountNumber": "00125081300002",
+          "transactionType": "WITHDRAW",
+          "amount": 10000.0,
+          "fee": 0.0,
+          "createdTimeStamp": "2025-08-13T14:51:20.361416"
+        },
+        {
+          "transactionId": "e7aa77fc-f456-4009-9e4b-ddaf715fb867",
+          "toAccountNumber": "00125081300002",
+          "transactionType": "DEPOSIT",
+          "amount": 10000.0,
+          "fee": 0.0,
+          "createdTimeStamp": "2025-08-13T14:49:29.473054"
+        }
+      ],
+      "pageable": {
+        "pageNumber": 0,
+        "pageSize": 10,
         "sort": {
-            "sorted": true,
-            "empty": false,
-            "unsorted": false
+          "sorted": true,
+          "empty": false,
+          "unsorted": false
         },
-        "first": true,
-        "numberOfElements": 7,
-        "empty": false
+        "offset": 0,
+        "paged": true,
+        "unpaged": false
+      },
+      "last": true,
+      "totalElements": 7,
+      "totalPages": 1,
+      "size": 10,
+      "number": 0,
+      "sort": {
+        "sorted": true,
+        "empty": false,
+        "unsorted": false
+      },
+      "first": true,
+      "numberOfElements": 7,
+      "empty": false
     },
     "message": "거래 내역 조회가 완료되었습니다.",
     "timestamp": "2025-08-13T15:00:42.729606369"
@@ -369,21 +451,22 @@
 ## 상태 및 오류 코드
 
 ### 결과 코드(`result_code`)
-  - `1`
-    - 성공
-    - 요청이 성공적으로 처리되었으며 data 필드에 결과가 포함 경우 반환
-  - `0`
-    - 데이터 없음
-    - 요청은 성공했으나 반환할 데이터가 없는 경우 반환
-  - `-1`
-    - 데이터 조회 실패/오류
-    - 데이터 처리 중 오류가 발생했을 경우 반환
-  - `-2`
-    - 입력 파라미터 오류
-    - 요청으로 전달된 파라미터가 유효하지 않을 경우 반환
-  - `-3`
-    - 서버 오류
-    - 내부 서버 오류가 발생할 경우 반환
+
+- `1`
+  - 성공
+  - 요청이 성공적으로 처리되었으며 data 필드에 결과가 포함 경우 반환
+- `0`
+  - 데이터 없음
+  - 요청은 성공했으나 반환할 데이터가 없는 경우 반환
+- `-1`
+  - 데이터 조회 실패/오류
+  - 데이터 처리 중 오류가 발생했을 경우 반환
+- `-2`
+  - 입력 파라미터 오류
+  - 요청으로 전달된 파라미터가 유효하지 않을 경우 반환
+- `-3`
+  - 서버 오류
+  - 내부 서버 오류가 발생할 경우 반환
 
 ### 오류 코드
 
@@ -470,17 +553,17 @@
 
 ## 시스템 정책 및 제약 사항
 
-* 출금 일일 한도 : 1,000,000원
-* 이체 일일 한도 : 3,000,000원
-* 이체 시 수수료 : 1%
-  * 소수점 둘째 자리까지 반올림 (HALF_UP) 처리
-* 거래 불가 조건
-  * 송금 또는 수신 계좌 상태가 `INACTIVE`일 경우 이체 불가
-  * 동일 계좌 간 이체 금지
-* 계좌 삭제 불가 조건
-  * 거래 내역이 있고 계좌 상태가 ACTIVE인 경우 삭제 불가
-* 페이징 요청
-  * 기본 페이지 번호: 0
-  * 기본 페이지 크기: 10
-  * 최대 페이지 크기: 100
-  * 거래 정렬 필드: `createdTimeStamp`
+- 출금 일일 한도 : 1,000,000원
+- 이체 일일 한도 : 3,000,000원
+- 이체 시 수수료 : 1%
+  - 소수점 둘째 자리까지 반올림 (HALF_UP) 처리
+- 거래 불가 조건
+  - 송금 또는 수신 계좌 상태가 `INACTIVE`일 경우 이체 불가
+  - 동일 계좌 간 이체 금지
+- 계좌 삭제 불가 조건
+  - 거래 내역이 있고 계좌 상태가 ACTIVE인 경우 삭제 불가
+- 페이징 요청
+  - 기본 페이지 번호: 0
+  - 기본 페이지 크기: 10
+  - 최대 페이지 크기: 100
+  - 거래 정렬 필드: `createdTimeStamp`
